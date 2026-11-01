@@ -1,0 +1,16 @@
+{
+  "games": [
+    {
+      "id": "callofvoid",
+      "title": "Call of Void",
+      "tagline": "На том проводе не человек",
+      "description": "Вы диспечер аварийной службы города. В городе произошла трагедия и на улицах появились имитаторы. Вам будут звонить разные люди - ваша задача понять, кто находиться по ту сторону телефона.",
+      "version": "1.0.0",
+      "colors": ["#1d1b4d", "#7b3fe4"],
+      "cover": "https://raw.githubusercontent.com/aleximperor3-arch/L-Games/main/CallOfVoidpng.png",
+      "download": "https://github.com/aleximperor3-arch/L-Games/releases/download/callofvoid-1.0.0/CallOfVoid.zip",
+      "exe": "CallOfVoid.exe",
+      "folderName": "CallOfVoid"
+    }
+  ]
+}
