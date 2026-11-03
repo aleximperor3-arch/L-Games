@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101a2e">
+<title>L</title>
+<style>
+:root{--bg:#101a2e;--panel:#17233d;--hover:#1e2d4d;--line:#28385c;--text:#e6ebf7;--muted:#8d9bbd;--accent:#4c7dff;--accent2:#6a93ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{display:flex;flex-direction:column;height:100dvh;background:var(--bg);color:var(--text);font:15px/1.4 "Segoe UI",system-ui,-apple-system,sans-serif}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
+header{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:var(--panel);border-bottom:1px solid var(--line)}
+header svg{width:34px;height:34px}
+header b{font-size:18px;flex:1}
+header small{color:var(--muted);font-weight:400;margin-left:6px}
+#reload{padding:8px 12px;border-radius:8px;background:var(--hover)}
+main{flex:1;overflow-y:auto;padding:18px 16px}
+nav{display:flex;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:14px 4px;color:var(--muted)}
+nav button.on{color:var(--text);font-weight:600;box-shadow:inset 0 2px 0 var(--accent)}
+h1{font-size:22px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.cover{background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:12px 14px}
+.cover b{font-size:22px;font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+.s{height:130px}.big{height:200px;border-radius:12px}
+.body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.muted{color:var(--muted)}
+.btn{padding:10px 16px;border-radius:8px;background:var(--accent);font-weight:600;text-align:center;text-decoration:none;color:#fff;display:inline-block}
+.btn:disabled{background:var(--line);color:var(--muted);cursor:default}
+.ghost{background:none;color:var(--muted);font-weight:400}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:14px}
+.chip{flex:none;padding:8px 14px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
+.chip.on{border-color:var(--accent);background:var(--hover)}
+.det{display:flex;flex-direction:column;gap:12px;max-width:640px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.note{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--muted)}
+.err{color:#ff8787;padding:8px 0;word-break:break-word}
+.ncard{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.ncard:active{background:var(--hover)}
+.nt{font-size:18px;font-weight:700;margin:2px 0 6px}
+.nm{color:var(--accent2);font-size:14px;margin-top:8px}
+.art{max-width:720px}
+.art h1{font-size:26px;line-height:1.2;margin:12px 0 6px}
+.art h2{font-size:20px;margin:26px 0 8px}
+.art p{font-size:16px;line-height:1.7;margin-bottom:14px}
+.art .cover{margin:6px 0 14px}
+.art>.muted{margin-bottom:18px}
+.foot{color:var(--muted);font-size:13px;margin-top:22px}
+</style>
+</head>
+<body>
+<header>
+  <svg viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke-width="16"><ellipse cx="256" cy="256" rx="46" ry="133" stroke="#2f6df0"/><ellipse cx="256" cy="256" rx="46" ry="133" stroke="#8fd3f5" transform="rotate(60 256 256)"/><ellipse cx="256" cy="256" rx="46" ry="133" stroke="#6db8f2" transform="rotate(-60 256 256)"/></g><path d="M224 208H246V282H288V304H224Z" fill="#6fd0ff"/></svg>
+  <b>L<small>веб-версия</small></b>
+  <button id="reload" aria-label="Обновить">Обновить</button>
+</header>
+<main>
+  <section id="v-store"></section>
+  <section id="v-library" hidden></section>
+  <section id="v-news" hidden></section>
+</main>
+<nav>
+  <button class="on" data-v="store">Магазин</button>
+  <button data-v="library">Библиотека</button>
+  <button data-v="news">Новости</button>
+</nav>
+<script>
+const BASE = 'https://raw.githubusercontent.com/aleximperor3-arch/L-Games/main/';
+const PC_URL = 'https://github.com/aleximperor3-arch/L-Launcher/releases/latest';
+
+let games = [], news = [], gamesErr = '', newsErr = '', loading = true;
+let library = readLib(), selected = null, openId = null, newsScroll = 0;
+
+function readLib() { try { return JSON.parse(localStorage.getItem('l-library') || '[]'); } catch (e) { return []; } }
+function saveLib() { try { localStorage.setItem('l-library', JSON.stringify(library)); } catch (e) {} }
+
+const $ = (id) => document.getElementById(id);
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+function paint(node, g) {
+  const c = g.colors || ['#3b5bdb', '#15aabf'];
+  node.style.backgroundImage = g.cover ? 'linear-gradient(rgba(0,0,0,.15),rgba(0,0,0,.15)),url("' + g.cover + '")' : 'linear-gradient(135deg,' + c[0] + ',' + c[1] + ')';
+}
+const fail = (name, e) => e instanceof SyntaxError ? 'В файле ' + name + ' ошибка: ' + e.message : 'Не удалось загрузить ' + name + ': ' + e.message;
+
+// "?t=" заставляет GitHub отдать самую свежую версию файла, а не кэш - удобно проверять правки
+async function getJson(name) {
+  const r = await fetch(BASE + name + '?t=' + Date.now());
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+async function load() {
+  loading = true; renderAll();
+  gamesErr = newsErr = '';
+  try { const c = await getJson('games.json'); games = (c && c.games) || []; } catch (e) { gamesErr = fail('games.json', e); }
+  try {
+    const n = await getJson('news.json');
+    news = ((n && n.news) || []).map((x, i) => Object.assign({}, x, { id: x.id || 'n' + i }));
+    news.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  } catch (e) { newsErr = fail('news.json', e); }
+  loading = false; renderAll();
+}
+
+/* ---- Магазин ---- */
+function renderStore() {
+  const root = $('v-store'); root.replaceChildren(el('h1', '', 'Магазин'));
+  if (loading) return root.append(el('div', 'muted', 'Загружаем…'));
+  if (gamesErr) return root.append(el('div', 'err', gamesErr));
+  const grid = el('div', 'grid');
+  for (const g of games) {
+    const card = el('div', 'card'), cv = el('div', 'cover s');
+    paint(cv, g); cv.append(el('b', '', g.title));
+    const body = el('div', 'body'), has = library.includes(g.id);
+    const btn = el('button', 'btn', has ? 'В библиотеке' : 'Добавить в библиотеку');
+    btn.disabled = has;
+    btn.onclick = () => { library.push(g.id); saveLib(); renderStore(); renderLibrary(); };
+    body.append(el('div', 'muted', g.tagline || ''), el('div', 'muted', g.description || ''), btn);
+    card.append(cv, body); grid.append(card);
+  }
+  root.append(grid, el('div', 'foot', 'Игры устанавливаются в приложении L для ПК. Здесь можно смотреть магазин и новости.'));
+}
+
+/* ---- Библиотека ---- */
+function renderLibrary() {
+  const root = $('v-library'); root.replaceChildren(el('h1', '', 'Библиотека'));
+  const owned = games.filter((g) => library.includes(g.id));
+  if (!owned.length) return root.append(el('div', 'muted', loading ? 'Загружаем…' : 'Здесь пока пусто. Добавь игру из магазина.'));
+  if (!owned.some((g) => g.id === selected)) selected = owned[0].id;
+  const chips = el('div', 'chips');
+  for (const g of owned) {
+    const c = el('button', 'chip' + (g.id === selected ? ' on' : ''), g.title);
+    c.onclick = () => { selected = g.id; renderLibrary(); };
+    chips.append(c);
+  }
+  const cur = owned.find((g) => g.id === selected), d = el('div', 'det'), cv = el('div', 'cover big');
+  paint(cv, cur); cv.append(el('b', '', cur.title));
+  const row = el('div', 'row'), pc = el('a', 'btn', 'Скачать L для ПК');
+  pc.href = PC_URL; pc.target = '_blank'; pc.rel = 'noopener';
+  const rm = el('button', 'btn ghost', 'Убрать из библиотеки');
+  rm.onclick = () => { library = library.filter((x) => x !== cur.id); saveLib(); renderStore(); renderLibrary(); };
+  row.append(pc, rm);
+  d.append(cv, el('div', 'muted', 'Версия ' + (cur.version || '-')), el('p', 'muted', cur.description || ''),
+    el('div', 'note', 'Установить и запустить игру можно в приложении L на компьютере.'), row);
+  root.append(chips, d);
+}
+
+/* ---- Новости ---- */
+function paras(a) {
+  const raw = a.text, lines = Array.isArray(raw) ? raw : String(raw || '').split('\n');
+  return lines.map((l) => String(l).trim()).filter(Boolean);
+}
+function excerpt(a) {
+  if (a.excerpt) return a.excerpt;
+  const f = paras(a).find((p) => !p.startsWith('# ')) || '';
+  return f.length > 180 ? f.slice(0, 180).trimEnd() + '…' : f;
+}
+function fmt(s) {
+  const d = new Date(s);
+  return !s || isNaN(d) ? (s || '') : d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+function renderNews() {
+  const root = $('v-news'), main = document.querySelector('main');
+  root.replaceChildren();
+  if (loading) return root.append(el('h1', '', 'Новости'), el('div', 'muted', 'Загружаем…'));
+  if (newsErr) return root.append(el('h1', '', 'Новости'), el('div', 'err', newsErr));
+  const a = news.find((n) => n.id === openId);
+  if (a) {
+    const back = el('button', 'btn ghost', '← Все новости');
+    back.onclick = () => { openId = null; renderNews(); main.scrollTop = newsScroll; };
+    const box = el('article', 'art');
+    if (a.cover) { const cv = el('div', 'cover big'); cv.style.backgroundImage = 'url("' + a.cover + '")'; box.append(cv); }
+    box.append(el('h1', '', a.title || ''), el('div', 'muted', fmt(a.date)));
+    box.style.paddingBottom = '24px';
+    for (const l of paras(a)) box.append(l.startsWith('# ') ? el('h2', '', l.slice(2)) : el('p', '', l));
+    root.append(back, box); main.scrollTop = 0; return;
+  }
+  root.append(el('h1', '', 'Новости'));
+  if (!news.length) return root.append(el('div', 'muted', 'Новостей пока нет.'));
+  for (const n of news) {
+    const c = el('button', 'ncard');
+    c.append(el('div', 'muted', fmt(n.date)), el('div', 'nt', n.title || ''), el('div', 'muted', excerpt(n)), el('div', 'nm', 'Читать полностью →'));
+    c.onclick = () => { newsScroll = main.scrollTop; openId = n.id; renderNews(); };
+    root.append(c);
+  }
+}
+
+function renderAll() { renderStore(); renderLibrary(); renderNews(); }
+
+document.querySelectorAll('nav button').forEach((b) => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach((x) => x.classList.toggle('on', x === b));
+  for (const v of ['store', 'library', 'news']) $('v-' + v).hidden = v !== b.dataset.v;
+  document.querySelector('main').scrollTop = 0;
+});
+$('reload').onclick = load;
+load();
+</script>
+</body>
+</html>
