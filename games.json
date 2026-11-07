@@ -23,7 +23,7 @@
       "description": "Вы играете за робота с магнитом. На станции произошла авария и вам надо устранять вражеских дронов, которые некогда были своими.",
       "version": "0.0.1",
       "colors": ["#1d1b4d", "#7b3fe4"],
-      "cover": "SpaceRun Banner.png",
+      "cover": "https://raw.githubusercontent.com/aleximperor3-arch/L-Games/main/SpaceRun%20Banner.png",
       "download": "https://github.com/aleximperor3-arch/L-Games/releases/download/SpaceRun-v0.0.1/SpaceRun.zip",
       "exe": "SpaceRun.exe",
       "folderName": "Space Run"
