@@ -24,7 +24,7 @@
       "version": "0.0.1",
       "colors": ["#1d1b4d", "#7b3fe4"],
       "cover": "https://github.com/aleximperor3-arch/L-Games/blob/main/SpaceRun%20Banner.png",
-      "download": "",
+      "download": "https://github.com/aleximperor3-arch/L-Games/releases/download/SpaceRun-v0.0.1/SpaceRun.zip",
       "exe": "SpaceRun.exe",
       "folderName": "Space Run"
     }
